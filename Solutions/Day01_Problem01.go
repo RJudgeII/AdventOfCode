@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+
+	"./Packages/errors"
 )
 
 func main() {
 	data, err := os.Open("../Inputs/Day01_Input.txt")
-	check(err)
+	errors.Check(err)
 	defer data.Close()
 
 	var s []int
@@ -17,7 +19,7 @@ func main() {
 	scanner := bufio.NewScanner(data)
 	for scanner.Scan() {
 		i, err := strconv.Atoi(scanner.Text())
-		check(err)
+		errors.Check(err)
 		s = append(s, i)
 	}
 
@@ -28,10 +30,4 @@ func main() {
 	}
 
 	fmt.Print(out)
-}
-
-func check(err error) {
-	if err != nil {
-		panic(err)
-	}
 }
