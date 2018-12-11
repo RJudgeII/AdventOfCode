@@ -2,14 +2,13 @@ package main
 
 import (
 	"bufio"
-	"fmt"
-	"os"
 	"strconv"
+
+	"../utils"
 )
 
 func main() {
-	data, err := os.Open("../Inputs/Day01_Input.txt")
-	check(err)
+	data := utils.GetProblemInput("01")
 	defer data.Close()
 
 	var s []int
@@ -17,35 +16,33 @@ func main() {
 	scanner := bufio.NewScanner(data)
 	for scanner.Scan() {
 		i, err := strconv.Atoi(scanner.Text())
-		check(err)
+		utils.CheckError(err)
 		s = append(s, i)
 	}
 
+	total := 0
 	var freqs = make(map[int]bool)
-
-	freq := 0
 	exists := false
+	repeated := 0
 
+	run := 1
 	for {
 		for _, diff := range s {
-			freq += diff
-			if freqs[freq] {
+			total += diff
+			if freqs[total] && !exists {
 				exists = true
-				break
+				repeated = total
 			} else {
-				freqs[freq] = true
+				freqs[total] = true
 			}
 		}
+		if run == 1 {
+			utils.PrintSolution(1, strconv.Itoa(total))
+			run++
+		}
 		if exists {
+			utils.PrintSolution(2, strconv.Itoa(repeated))
 			break
 		}
-	}
-
-	fmt.Print(freq)
-}
-
-func check(err error) {
-	if err != nil {
-		panic(err)
 	}
 }
