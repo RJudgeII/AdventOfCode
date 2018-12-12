@@ -2,12 +2,10 @@ package main
 
 import (
 	"bufio"
-	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
-	"./Packages/errors"
+	"../utils"
 )
 
 type node struct {
@@ -19,8 +17,7 @@ type node struct {
 }
 
 func main() {
-	data, err := os.Open("../Inputs/Day08_Input.txt")
-	errors.Check(err)
+	data := utils.GetProblemInput("08")
 	defer data.Close()
 
 	var numbers []int
@@ -31,13 +28,15 @@ func main() {
 
 		for _, num := range s {
 			dat, err := strconv.Atoi(num)
-			errors.Check(err)
+			utils.CheckError(err)
 			numbers = append(numbers, dat)
 		}
 	}
 
 	root := getNodeData(0, numbers)
-	fmt.Println(addNodeValue(root))
+
+	utils.PrintSolution(1, strconv.Itoa(addMetadata(root)))
+	utils.PrintSolution(2, strconv.Itoa(addNodeValue(root)))
 }
 
 func getNodeData(start int, data []int) node {
@@ -63,6 +62,16 @@ func getNodeLength(n node) (result int) {
 	result = 2 + n.lenMetadata
 	for i := 0; i < n.lenChildren; i++ {
 		result += getNodeLength(n.children[i])
+	}
+	return
+}
+
+func addMetadata(n node) (result int) {
+	for _, child := range n.children {
+		result += addMetadata(child)
+	}
+	for _, data := range n.metadata {
+		result += data
 	}
 	return
 }

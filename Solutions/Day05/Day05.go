@@ -2,15 +2,13 @@ package main
 
 import (
 	"bufio"
-	"fmt"
-	"os"
+	"strconv"
 
-	"./Packages/errors"
+	"../utils"
 )
 
 func main() {
-	data, err := os.Open("../Inputs/Day05_Input.txt")
-	errors.Check(err)
+	data := utils.GetProblemInput("05")
 	defer data.Close()
 
 	var s string
@@ -22,9 +20,19 @@ func main() {
 
 	r := []rune(s)
 
+	for i := len(r) - 2; i >= 0; i-- {
+		if i != len(r)-1 && checkPolarity(r, i) {
+			r = append(r[:i], r[i+2:]...)
+		}
+	}
+
+	utils.PrintSolution(1, strconv.Itoa(len(r)))
+
+	r2 := []rune(s)
+
 	minLen := len(r) + 1
 	for cha := 65; cha <= 90; cha++ {
-		newR := removeUnit(r, cha)
+		newR := removeUnit(r2, cha)
 		for i := len(newR) - 2; i >= 0; i-- {
 			if i != len(newR)-1 && checkPolarity(newR, i) {
 				newR = append(newR[:i], newR[i+2:]...)
@@ -35,7 +43,7 @@ func main() {
 		}
 	}
 
-	fmt.Println(minLen)
+	utils.PrintSolution(2, strconv.Itoa(minLen))
 }
 
 func checkPolarity(r []rune, index int) (result bool) {
@@ -48,7 +56,6 @@ func checkPolarity(r []rune, index int) (result bool) {
 	} else if ascii >= 97 && ascii <= 122 && ascii2 == ascii-32 {
 		result = true
 	}
-
 	return
 }
 
@@ -61,6 +68,5 @@ func removeUnit(r []rune, val int) (result []rune) {
 			result = append(result[:i], result[i+1:]...)
 		}
 	}
-
 	return
 }

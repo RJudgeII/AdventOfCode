@@ -2,31 +2,29 @@ package main
 
 import (
 	"bufio"
-	"fmt"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
-	"./Packages/errors"
+	"../utils"
 )
 
-type GuardData struct {
+type guardData struct {
 	dateTime time.Time
 	datum    string
 }
 
-type Minutes struct {
+type timeTotals struct {
 	minutes [60]int
+	total   int
 }
 
 func main() {
-	data, err := os.Open("../Inputs/Day04_Input.txt")
-	errors.Check(err)
+	data := utils.GetProblemInput("04")
 	defer data.Close()
 
-	var guards []GuardData
+	var guards []guardData
 
 	scanner := bufio.NewScanner(data)
 	for scanner.Scan() {
@@ -34,17 +32,17 @@ func main() {
 
 		givenDate := strings.Split(s[0], "[")[1] + " " + strings.Split(s[1], "]")[0]
 		dat, err := time.Parse("2006-01-02 15:04", givenDate)
-		errors.Check(err)
+		utils.CheckError(err)
 
 		swi := s[3]
 
-		guards = append(guards, GuardData{dat, swi})
+		guards = append(guards, guardData{dat, swi})
 	}
 
 	sort.Slice(guards, func(i, j int) bool { return guards[j].dateTime.After(guards[i].dateTime) })
 
 	var guardID string
-	var guardTimes = make(map[string]*Minutes)
+	var guardTimes = make(map[string]*timeTotals)
 
 	var start int
 	var end int
@@ -53,7 +51,7 @@ func main() {
 		switcher := point.datum
 		if string(switcher[0]) == "#" {
 			if _, ok := guardTimes[switcher]; !ok {
-				guardTimes[switcher] = &Minutes{[60]int{}}
+				guardTimes[switcher] = &timeTotals{[60]int{}, 0}
 			}
 			guardID = switcher
 		} else if switcher == "asleep" {
@@ -61,16 +59,38 @@ func main() {
 		} else if switcher == "up" {
 			end = point.dateTime.Minute()
 			for i := start; i < end; i++ {
-				guardTimes[guardID].minutes[i] += 1
+				guardTimes[guardID].minutes[i]++
 			}
+			guardTimes[guardID].total += (end - start)
 		}
 	}
 
-	maxMinute := -1
+	maxTotal := -1
+	for id, val := range guardTimes {
+		if val.total > maxTotal {
+			maxTotal = val.total
+			guardID = id
+		}
+	}
+
 	minute := -1
+	maxTotal = -1
+	for id, val := range guardTimes[guardID].minutes {
+		if val > maxTotal {
+			minute = id
+			maxTotal = val
+		}
+	}
+
+	idNum, err := strconv.Atoi(strings.Split(guardID, "#")[1])
+	utils.CheckError(err)
+
+	utils.PrintSolution(1, strconv.Itoa(idNum*minute))
+
+	maxMinute := -1
+	minute = -1
 
 	for id, arr := range guardTimes {
-		//fmt.Println(arr)
 		for ind, min := range arr.minutes {
 			if min > maxMinute {
 				guardID = id
@@ -80,8 +100,9 @@ func main() {
 		}
 	}
 
-	idNum, err := strconv.Atoi(strings.Split(guardID, "#")[1])
-	errors.Check(err)
+	idNum, err = strconv.Atoi(strings.Split(guardID, "#")[1])
+	utils.CheckError(err)
 
-	fmt.Println(idNum * minute)
+	utils.PrintSolution(2, strconv.Itoa(idNum*minute))
+
 }

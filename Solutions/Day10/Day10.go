@@ -2,13 +2,11 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"math"
-	"os"
 	"strconv"
 	"strings"
 
-	"./Packages/errors"
+	"../utils"
 )
 
 type star struct {
@@ -19,8 +17,7 @@ type star struct {
 }
 
 func main() {
-	data, err := os.Open("../Inputs/Day10_Input.txt")
-	errors.Check(err)
+	data := utils.GetProblemInput("10")
 	defer data.Close()
 
 	var stars []star
@@ -28,16 +25,16 @@ func main() {
 	scanner := bufio.NewScanner(data)
 	for scanner.Scan() {
 		x, err := strconv.Atoi(strings.TrimSpace(scanner.Text()[10:16]))
-		errors.Check(err)
+		utils.CheckError(err)
 
 		y, err := strconv.Atoi(strings.TrimSpace(scanner.Text()[18:24]))
-		errors.Check(err)
+		utils.CheckError(err)
 
 		vX, err := strconv.Atoi(strings.TrimSpace(scanner.Text()[36:38]))
-		errors.Check(err)
+		utils.CheckError(err)
 
 		vY, err := strconv.Atoi(strings.TrimSpace(scanner.Text()[40:42]))
-		errors.Check(err)
+		utils.CheckError(err)
 
 		stars = append(stars, star{x, y, vX, vY})
 	}
@@ -50,6 +47,11 @@ func main() {
 	maxX := 0
 	minY := 0
 	maxY := 0
+
+	lastMinX := 0
+	lastMaxX := 0
+	lastMinY := 0
+	lastMaxY := 0
 
 	for {
 		step++
@@ -77,8 +79,34 @@ func main() {
 			break
 		}
 		lastArea = area
+		lastMinX = minX
+		lastMaxX = maxX
+		lastMinY = minY
+		lastMaxY = maxY
 	}
 	step--
 
-	fmt.Println(step)
+	starMap := make([][]bool, lastMaxY-lastMinY+1)
+	for i := 0; i < len(starMap); i++ {
+		starMap[i] = make([]bool, lastMaxX-lastMinX+1)
+	}
+
+	for _, sta := range stars {
+		starMap[sta.y+sta.vY*step-lastMinY][sta.x+sta.vX*step-lastMinX] = true
+	}
+
+	output := ""
+	for i := 0; i < len(starMap); i++ {
+		for j := 0; j < len(starMap[0]); j++ {
+			if starMap[i][j] {
+				output += "#"
+			} else {
+				output += " "
+			}
+		}
+		output += "\n"
+	}
+
+	utils.PrintSolution(1, output)
+	utils.PrintSolution(2, strconv.Itoa(step))
 }

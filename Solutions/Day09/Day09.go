@@ -2,12 +2,10 @@ package main
 
 import (
 	"bufio"
-	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
-	"./Packages/errors"
+	"../utils"
 )
 
 type marble struct {
@@ -17,8 +15,7 @@ type marble struct {
 }
 
 func main() {
-	data, err := os.Open("../Inputs/Day09_Input.txt")
-	errors.Check(err)
+	data := utils.GetProblemInput("09")
 	defer data.Close()
 
 	var s []string
@@ -29,11 +26,41 @@ func main() {
 	}
 
 	numPlayers, err := strconv.Atoi(s[0])
-	errors.Check(err)
+	utils.CheckError(err)
 	lastMarble, err := strconv.Atoi(s[6])
-	errors.Check(err)
-	lastMarble *= 100
+	utils.CheckError(err)
 
+	utils.PrintSolution(1, strconv.Itoa(playGame(numPlayers, lastMarble)))
+	utils.PrintSolution(1, strconv.Itoa(playGame(numPlayers, lastMarble*100)))
+}
+
+func placeMarble(value int, ind int, marbles []int) (outMarbles []int) {
+	if ind == len(marbles) {
+		outMarbles = append(marbles, value)
+	} else {
+		outMarbles = append(marbles, 0)
+		copy(outMarbles[ind+1:], outMarbles[ind:])
+		outMarbles[ind] = value
+	}
+	return
+}
+
+func removeMarble(index int, marbles []int) (value int, outMarbles []int) {
+	value = marbles[index]
+	outMarbles = append(marbles[:index], marbles[index+1:]...)
+	return
+}
+
+func getMax(players []int) (result int) {
+	for _, val := range players {
+		if val > result {
+			result = val
+		}
+	}
+	return
+}
+
+func playGame(numPlayers, lastMarble int) (result int) {
 	players := make([]int, numPlayers)
 
 	current := &marble{value: 0}
@@ -60,12 +87,6 @@ func main() {
 		}
 	}
 
-	max := 0
-	for _, val := range players {
-		if val > max {
-			max = val
-		}
-	}
-
-	fmt.Println(max)
+	result = getMax(players)
+	return
 }
